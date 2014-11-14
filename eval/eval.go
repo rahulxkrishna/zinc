@@ -2,83 +2,73 @@ package eval
 
 import (
 	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"strings"
+	"github.com/teacoder/gron/manager"
+	_ "io/ioutil"
+	_ "math/rand"
+	"os/exec"
+	_ "strings"
 	"time"
 )
 
-const CONFIG_FILE = "crontab"
-const MAX_CRONTAB_SZ = 10
-
-type Config struct {
-	id         uint32
-	minute     string
-	hour       string
-	dayOfMonth string
-	month      string
-	dayOfWeek  string
-	action     string
+type Exec struct {
+	id       uint32
+	atTime   int64
+	interval int64 //seconds
+	cmd      string
 }
 
-var runningConfig [MAX_CRONTAB_SZ]Config
+var execQueue [manager.MaxEntries]Exec
 
-// RedConfig reads the configuration in when starting up
-// Just a raw representation of the file data; will be converted to an
-// appropriate internal DS.
-// The crontab file is expected to be in the standard crontab format
-
-//TODO Comments made by the user in the crontab file should not be lost,
-// should we add/remove rules via our interface and then submit to the file.
-
-func ReadConfig() {
-	rand.Seed(time.Now().Unix())
-
-	// Add a uid to identify a entry uniquely (Helpful for the manager to add/del?)
-	uid := rand.Uint32()
-
-	buf, err := ioutil.ReadFile(CONFIG_FILE)
+// Execute runs the command passed to it
+func Execute(cmd string) error {
+	cmdExec := exec.Command(cmd)
+	op, err := cmdExec.Output()
 
 	if err != nil {
-		fmt.Println("Failed to open crontab, starting up with an empty config")
+		fmt.Println("Error : " + err.Error())
+		return err
 	}
 
-	lines := strings.Split(string(buf), "\n")
+	fmt.Print(string(op))
 
-	for i := 0; i < len(lines); i++ {
-		attrs := strings.Fields(lines[i])
-		if len(attrs) > 0 {
-			runningConfig[i].id = uid
-			runningConfig[i].minute = attrs[0]
-			runningConfig[i].hour = attrs[1]
-			runningConfig[i].dayOfMonth = attrs[2]
-			runningConfig[i].month = attrs[3]
-			runningConfig[i].dayOfWeek = attrs[4]
-			runningConfig[i].action = attrs[5]
-			uid += 1
+	return nil
+}
+
+// PopulateExecQueue converts the in-memory config to an exec queue format for
+// the evaluator to run over and execute.
+func PopulateExecQueue() {
+
+	// Let's deal with some dummy values now
+	execQueue[0] = Exec{100, time.Now().Unix(), 10, "ls"}
+	execQueue[1] = Exec{101, time.Now().Unix(), 5, "date"}
+	execQueue[2] = Exec{102, time.Now().Unix(), 15, "time"}
+}
+
+// Init initializes the internal data structures for the evaluator
+func Init() {
+	PopulateExecQueue()
+}
+
+// Poll will be called periodicaly from the main loop.
+// It walks the execution queue and run any commands whose time has come
+func Poll() {
+	for i := 0; i < len(execQueue); i++ {
+		if execQueue[i].id != 0 && time.Now().Unix() >= execQueue[i].atTime {
+			Execute(execQueue[i].cmd)
+			//Now, schedule it for the next interval
+			execQueue[i].atTime += execQueue[i].interval
 		}
 	}
 }
 
-// PrintConfig is a utility function to dump the in-memory config
-
-func PrintConfig() {
-	for i := 0; i < MAX_CRONTAB_SZ; i++ {
-		if runningConfig[i].id > 0 {
-			fmt.Printf("%d %s %s %s %s %s %s\n",
-				runningConfig[i].id,
-				runningConfig[i].minute,
-				runningConfig[i].hour,
-				runningConfig[i].dayOfMonth,
-				runningConfig[i].month,
-				runningConfig[i].dayOfWeek,
-				runningConfig[i].action)
-		}
-	}
-}
-
+// Run is the entry function into the evaluator. It runs for ever, polling the
+// execution queue every second
 func Run() {
-	fmt.Println("Running the Evaluator")
-	ReadConfig()
-	PrintConfig()
+	fmt.Println("Running Evaluator")
+	Init()
+
+	for {
+		time.Sleep(1000)
+		Poll()
+	}
 }

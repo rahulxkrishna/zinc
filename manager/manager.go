@@ -5,13 +5,59 @@ package manager
 
 import (
 	"fmt"
+	"io/ioutil"
 )
 
+// Entry represents one entry in the crontab file
+type Entry struct {
+	minute uint8
+	hour   uint8
+	dom    uint8
+	mon    uint8
+	dow    uint8
+	user   string
+	cmd    string
+}
+
+// DefCrontab is the default crontab file
+const DefCrontab = "/etc/crontab"
+
+// MaxEntries is the maximum supported number of entries in the crontab
+// file
+const MaxEntries = 10
+
+// Manager defines the manager struct
+type Manager struct {
+	crontab string
+	entries [MaxEntries]Entry
+}
+
+// CrontabPath is the getter function for crontabPath
+func (m *Manager) Crontab() string {
+	return m.crontab
+}
+
+// SetCrontabPath sets the crontab path
+func (m *Manager) SetCrontab(p string) {
+	m.crontab = p
+}
+
+// New Creates a new manager
+func New() *Manager {
+	return &Manager{crontab: DefCrontab}
+}
+
 // ReadCrontab reads the crontab
-func ReadCrontab(crontabPath string) (x int, err error) {
+func (m *Manager) ReadCrontab() (x int, err error) {
 	x, err = 0, nil
 
-	fmt.Println("Reading crontab!")
+	fmt.Printf("Reading crontab file %s...\n", m.Crontab())
 
-	return x, err
+	buf, err := ioutil.ReadFile(m.Crontab())
+	if err != nil {
+		return x, err
+	}
+	fmt.Println(string(buf))
+
+	return
 }
