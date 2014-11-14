@@ -20,7 +20,7 @@ type Exec struct {
 var execQueue [manager.MaxEntries]Exec
 
 // Execute runs the command passed to it
-func Execute(cmd string) error {
+func execute(cmd string) error {
 	cmdExec := exec.Command(cmd)
 	op, err := cmdExec.Output()
 
@@ -36,7 +36,7 @@ func Execute(cmd string) error {
 
 // PopulateExecQueue converts the in-memory config to an exec queue format for
 // the evaluator to run over and execute.
-func PopulateExecQueue() {
+func populateExecQueue() {
 
 	// Let's deal with some dummy values now
 	execQueue[0] = Exec{100, time.Now().Unix(), 10, "ls"}
@@ -45,16 +45,16 @@ func PopulateExecQueue() {
 }
 
 // Init initializes the internal data structures for the evaluator
-func Init() {
-	PopulateExecQueue()
+func initialize() {
+	populateExecQueue()
 }
 
 // Poll will be called periodicaly from the main loop.
 // It walks the execution queue and run any commands whose time has come
-func Poll() {
+func poll() {
 	for i := 0; i < len(execQueue); i++ {
 		if execQueue[i].id != 0 && time.Now().Unix() >= execQueue[i].atTime {
-			Execute(execQueue[i].cmd)
+			execute(execQueue[i].cmd)
 			//Now, schedule it for the next interval
 			execQueue[i].atTime += execQueue[i].interval
 		}
@@ -65,10 +65,10 @@ func Poll() {
 // execution queue every second
 func Run() {
 	fmt.Println("Running Evaluator")
-	Init()
+	initialize()
 
 	for {
 		time.Sleep(1000)
-		Poll()
+		poll()
 	}
 }
