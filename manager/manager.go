@@ -6,6 +6,7 @@ package manager
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 )
 
 // Entry represents one entry in the crontab file
@@ -32,12 +33,12 @@ type Manager struct {
 	entries [MaxEntries]Entry
 }
 
-// CrontabPath is the getter function for crontabPath
+// Crontab is the getter function for crontab
 func (m *Manager) Crontab() string {
 	return m.crontab
 }
 
-// SetCrontabPath sets the crontab path
+// SetCrontab sets the crontab path
 func (m *Manager) SetCrontab(p string) {
 	m.crontab = p
 }
@@ -60,4 +61,9 @@ func (m *Manager) ReadCrontab() (x int, err error) {
 	fmt.Println(string(buf))
 
 	return
+}
+
+// ServeHTTP is the HTTP server for gron
+func (m *Manager) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "gron!")
 }
