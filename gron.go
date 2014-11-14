@@ -7,5 +7,5 @@ import (
 
 func main() {
 	manager.ReadCrontab("gron.go")
-	eval.Run()
+	eval.Init()
 }
