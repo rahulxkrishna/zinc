@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
-	manager.ReadCrontab("gron.go")
+	// create a new manager object
+	man := manager.New()
+	man.ReadCrontab()
+
 	eval.Run()
 }
