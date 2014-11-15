@@ -4,7 +4,6 @@ import (
 	"github.com/teacoder/gron/eval"
 	"github.com/teacoder/gron/manager"
 	"log"
-	"net/http"
 	"sync"
 )
 
@@ -12,14 +11,16 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	// create a new manager object
-	man := manager.New()
-	_, err := man.ReadCrontab()
+	// Create a new manager object
+	_, err := manager.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	go http.ListenAndServe("localhost:40000", man)
 
+	// @teacoder: eval needs to use the manager object returned above so that
+	// it can access the crontab entries. perhaps do that during
+	// initialization (outside Run())? like: eval.initialize(), then go
+	// eval.Run()?
 	go eval.Run()
 
 	wg.Wait()
