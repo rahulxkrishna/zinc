@@ -4,9 +4,11 @@ Package manager implements the gron manager.
 package manager
 
 import (
+	//"bufio"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	//"os"
 )
 
 // Entry represents one entry in the crontab file
@@ -29,8 +31,9 @@ const MaxEntries = 10
 
 // Manager defines the manager struct
 type Manager struct {
-	crontab string
-	entries [MaxEntries]Entry
+	crontab         string
+	crontabContents string
+	entries         [MaxEntries]Entry
 }
 
 // Crontab is the getter function for crontab
@@ -52,18 +55,33 @@ func New() *Manager {
 func (m *Manager) ReadCrontab() (x int, err error) {
 	x, err = 0, nil
 
-	fmt.Printf("Reading crontab file %s...\n", m.Crontab())
-
-	buf, err := ioutil.ReadFile(m.Crontab())
+	fmt.Printf("Reading crontab file %s...\n", m.crontab)
+	buf, err := ioutil.ReadFile(m.crontab)
 	if err != nil {
 		return x, err
 	}
-	fmt.Println(string(buf))
+	m.crontabContents = string(buf)
+
+	/*
+		f, err := os.Open(m.crontab)
+		if err != nil {
+			return x, err
+		}
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		}
+
+		f.Close()
+	*/
 
 	return
 }
 
 // ServeHTTP is the HTTP server for gron
 func (m *Manager) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "gron!")
+	fmt.Fprintf(w, m.crontabContents)
 }
