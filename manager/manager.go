@@ -55,6 +55,9 @@ func New() (m *Manager, err error) {
 	// Create and initialize manager
 	m = &Manager{crontab: defCrontab, hostname: defHostname, port: defPort}
 	err = m.readCrontab()
+	if err != nil {
+		return m, err
+	}
 
 	// Run webserver in a goroutine
 	go http.ListenAndServe(m.hostname+":"+strconv.Itoa(int(m.port)), m)
@@ -150,9 +153,4 @@ func (m *Manager) convStoreToken(token string, field int) (err error) {
 	}
 
 	return
-}
-
-// ServeHTTP serves HTTP requests
-func (m *Manager) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, m.crontabContents)
 }
