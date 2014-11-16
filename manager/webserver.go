@@ -16,6 +16,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" && r.URL.Path != page {
 		page = r.URL.Path
 	}
+	// TODO: to see the pages, pwd should be github.com/teacoder/gron; fix this
 	// TODO: parse body
 	p := &Page{Title: "gron", Body: m.crontabContents}
 	t, err := template.ParseFiles("manager/template" + page)
