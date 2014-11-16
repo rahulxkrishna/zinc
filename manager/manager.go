@@ -42,7 +42,7 @@ const MaxEntries = 10
 type Manager struct {
 	// Crontab-related variables
 	crontab         string
-	crontabContents string
+	crontabContents []byte
 	entries         [MaxEntries]Entry
 	entryCount      uint8 // TODO: think of a better data type
 	// Webserver-related variables
@@ -60,7 +60,9 @@ func New() (m *Manager, err error) {
 	}
 
 	// Run webserver in a goroutine
-	go http.ListenAndServe(m.hostname+":"+strconv.Itoa(int(m.port)), m)
+	http.Handle("/", m)
+	http.HandleFunc("/css/", serveHTTPCSS)
+	go http.ListenAndServe(m.hostname+":"+strconv.Itoa(int(m.port)), nil)
 
 	return m, err
 }
@@ -81,15 +83,14 @@ func (m *Manager) readCrontab() (err error) {
 
 	// Read the crontab
 	fmt.Printf("Reading crontab file %s...\n", m.crontab)
-	buf, err := ioutil.ReadFile(m.crontab)
+	m.crontabContents, err = ioutil.ReadFile(m.crontab)
 	if err != nil {
 		return
 	}
-	m.crontabContents = string(buf)
 
 	// Scan the crontab lines
 	// TODO: is there a simpler way to do this?
-	scanner := bufio.NewScanner(strings.NewReader(m.crontabContents))
+	scanner := bufio.NewScanner(strings.NewReader(string(m.crontabContents)))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {

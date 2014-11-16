@@ -1,0 +1,20 @@
+/*
+ * style.css
+ * Cascading Style Sheet 3 document for gron
+ */
+
+body
+{
+    background-color: #FAFAFA;
+    color: #000000;
+    font-family: "Duru Sans", sans-serif;
+    font-size: 10pt;
+    margin: 0px;
+    padding: 0px;
+}
+
+h1
+{
+    font-family: "Patua One", serif;
+    font-size: 20pt;
+}
