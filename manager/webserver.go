@@ -5,11 +5,6 @@ import (
 	"net/http"
 )
 
-type Page struct {
-	Title string
-	Body  []byte
-}
-
 // ServeHTTP serves HTTP requests
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	page := "/index.htm"
@@ -17,14 +12,12 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		page = r.URL.Path
 	}
 	// TODO: to see the pages, pwd should be github.com/teacoder/gron; fix this
-	// TODO: parse body
-	p := &Page{Title: "gron", Body: m.crontabContents}
 	t, err := template.ParseFiles("manager/template" + page)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, p)
+	err = t.Execute(w, m)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

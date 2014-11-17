@@ -16,7 +16,8 @@
     </header>
     <article>
       <section>
-        <code>{{printf "%s" .Body}}</code>
+        <p>Using crontab file {{.Crontab}}.</p>
+        <code>{{range .Entries}} {{.BuildEntry}} <br /> {{end}}</code>
       </section>
     </article>
   </body>

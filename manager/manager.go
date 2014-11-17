@@ -67,6 +67,11 @@ func New() (m *Manager, err error) {
 	return m, err
 }
 
+// Crontab gets the crontab file name, for the template
+func (m *Manager) Crontab() string {
+	return m.crontab
+}
+
 // Entries gets the crontab entries stored in the Manager
 func (m *Manager) Entries() [MaxEntries]Entry {
 	return m.entries
@@ -75,6 +80,13 @@ func (m *Manager) Entries() [MaxEntries]Entry {
 // EntryCount gets the number of crontab entries stored in the Manager
 func (m *Manager) EntryCount() uint8 {
 	return m.entryCount
+}
+
+//BuildEntry builds a crontab entry from the Entry struct
+// TODO: check why this should be 'en Entry' and not 'en *Entry'
+func (en Entry) BuildEntry() string {
+	return fmt.Sprintf("%d\t%d\t%d\t%d\t%d\t%s\t%s",
+		en.min, en.hr, en.dom, en.mon, en.dow, en.user, en.cmd)
 }
 
 // readCrontab reads the crontab and builds the entries data structure
