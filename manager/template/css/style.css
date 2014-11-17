@@ -7,14 +7,45 @@ body
 {
     background-color: #FAFAFA;
     color: #000000;
-    font-family: "Duru Sans", sans-serif;
-    font-size: 10pt;
+    font-family: "Titillium Web", sans-serif;
+    font-size: 12pt;
     margin: 0px;
     padding: 0px;
 }
 
-h1
+header
 {
-    font-family: "Patua One", serif;
-    font-size: 20pt;
+    position: fixed;
+    z-index: 1;
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #EEEEEE;
+    color: #000000;
+    padding: 10px;
+}
+
+span#title
+{
+    font-family: "Yanone Kaffeesatz", sans-serif;
+    font-size: 24pt;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+.green
+{
+    color: #008800;
+}
+
+article
+{
+    position: absolute;
+    top: 100px;
+}
+
+code
+{
+    font-family: "Ubuntu Mono", monospace;
+    display: block;
+    padding: 10px;
 }

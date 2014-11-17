@@ -3,14 +3,21 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Duru+Sans" />
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Patua+One" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Titillium+Web" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu+Mono" />
     <!--<link rel="icon" type="image/png" href="favicon.png" />-->
     <title>gron</title>
   </head>
 
   <body>
-    <h1>{{.Title}}</h1>
-    <p>{{printf "%s" .Body}}</p>
+    <header>
+      <span id="title"><span class="green">g</span>r<span class="green">o</span>n</span>
+    </header>
+    <article>
+      <section>
+        <code>{{printf "%s" .Body}}</code>
+      </section>
+    </article>
   </body>
 </html>
