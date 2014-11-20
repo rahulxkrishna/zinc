@@ -11,17 +11,17 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	// @jayanthc : We should move the "Entry", and other common structures out of
+	// the manager package and into a common 'gron' realm. It'd be nice to keep these
+	// two loosely coupled.
+
 	// Create a new manager object
-	_, err := manager.New()
+	mgr, err := manager.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// @teacoder: eval needs to use the manager object returned above so that
-	// it can access the crontab entries. perhaps do that during
-	// initialization (outside Run())? like: eval.initialize(), then go
-	// eval.Run()?
-	go eval.Run()
+	go eval.Run(mgr.Entries(), int(mgr.EntryCount()))
 
 	wg.Wait()
 }

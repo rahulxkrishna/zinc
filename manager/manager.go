@@ -38,6 +38,15 @@ const defPort = 40000
 // MaxEntries is the maximum supported number of entries in the crontab file
 const MaxEntries = 10
 
+// @jayanthc
+// The Manager struct variables are private to the package. We need a getter.
+func (e *Entry) Get() map[string]interface{} {
+	m := map[string]interface{}{
+		"min": e.min, "hr": e.hr, "dom": e.dom, "mon": e.mon,
+		"dow": e.dow, "user": e.user, "cmd": e.cmd}
+	return m
+}
+
 // Manager defines the manager struct
 type Manager struct {
 	// Crontab-related variables
