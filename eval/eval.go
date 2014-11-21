@@ -6,6 +6,7 @@ import (
 	_ "io/ioutil"
 	_ "math/rand"
 	"os/exec"
+	"sort"
 	_ "strings"
 	"time"
 )
@@ -17,7 +18,23 @@ type Exec struct {
 	cmd      string
 }
 
-var execQueue [manager.MaxEntries]Exec
+type byTime []Exec
+
+var eQ [manager.MaxEntries]Exec
+
+// XXX Temporary hack ! Got to re-organize the struct, store the
+// queue count passed by the manager and return it.
+func (e byTime) Len() int {
+	count := 0
+	for i := 0; i < len(e); i++ {
+		if e[i].cmd != "" {
+			count++
+		}
+	}
+	return count
+}
+func (e byTime) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
+func (e byTime) Less(i, j int) bool { return e[i].atTime < e[j].atTime }
 
 // Execute runs the command passed to it
 func execute(cmd string) error {
@@ -63,9 +80,10 @@ func populateExecQueue(entries [manager.MaxEntries]manager.Entry, count int) {
 		} else { // Scheduled for the next day
 			secondsTd = int64(((SecondsInHour * 24) - secondsToday) + secondsSched)
 		}
-		execQueue[i] = Exec{100, curTime.Unix() + secondsTd, int64(SecondsInDay), cmd}
+		eQ[i] = Exec{100, curTime.Unix() + secondsTd, int64(SecondsInDay), cmd}
 		fmt.Printf("Running [%s] in %d seconds\n", cmd, secondsTd)
 	}
+	sort.Sort(byTime(eQ[0:]))
 }
 
 // Init initializes the internal data structures for the evaluator
@@ -73,28 +91,33 @@ func initialize(entries [manager.MaxEntries]manager.Entry, count int) {
 	populateExecQueue(entries, count)
 }
 
-// Poll will be called periodicaly from the main loop.
-// It walks the execution queue and run any commands whose time has come
-func poll() {
-	for i := 0; i < len(execQueue); i++ {
-		if execQueue[i].id != 0 && time.Now().Unix() >= execQueue[i].atTime {
-			execute(execQueue[i].cmd)
+// runHead runs the commands which are up for execution starting at the head
+// of the execution queue.
+func runHead() {
+	for i := 0; i < len(eQ); i++ {
+		if eQ[i].id != 0 && time.Now().Unix() >= eQ[i].atTime {
+			execute(eQ[i].cmd)
 			//Now, schedule it for the next interval
-			execQueue[i].atTime += execQueue[i].interval
+			eQ[i].atTime += eQ[i].interval
 			fmt.Printf("Executed [%s], next on %s \n",
-				execQueue[i].cmd,
-				time.Unix(execQueue[i].atTime, 0).String())
+				eQ[i].cmd,
+				time.Unix(eQ[i].atTime, 0).String())
+		} else {
+			break
 		}
 	}
+
+	sort.Sort(byTime(eQ[0:]))
 }
 
-// Run is the entry function into the evaluator. It runs for ever, polling the
-// execution queue every second
+// Run is the entry function into the evaluator. It initializes the execution queue
+// and bocks till the time the earliest command is to be run.
 func Run(entries [manager.MaxEntries]manager.Entry, count int) {
 	initialize(entries, count)
-
 	for {
-		time.Sleep(1000)
-		poll()
+		timer := time.NewTimer(time.Duration(eQ[0].atTime-time.Now().Unix()) * time.Second)
+		<-timer.C
+		fmt.Println("Here")
+		runHead()
 	}
 }
