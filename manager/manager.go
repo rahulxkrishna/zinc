@@ -60,9 +60,13 @@ type Manager struct {
 }
 
 // New Creates a new manager and performs initialization
-func New() (m *Manager, err error) {
+func New(userCrontab string) (m *Manager, err error) {
+	crontab := defCrontab
+	if userCrontab != "" {
+		crontab = userCrontab
+	}
 	// Create and initialize manager
-	m = &Manager{crontab: defCrontab, hostname: defHostname, port: defPort}
+	m = &Manager{crontab: crontab, hostname: defHostname, port: defPort}
 	err = m.readCrontab()
 	if err != nil {
 		return m, err

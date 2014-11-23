@@ -68,8 +68,10 @@ func (e *Evaluator) populateExecQueue(
 
 	// There has to be a better way to do this.
 	// TODO Add UTs
-	secondsToday := SecondsInHour*curTime.Hour() + SecondsInMin*curTime.Minute()
+	secondsToday := SecondsInHour*curTime.Hour() + SecondsInMin*curTime.Minute() + curTime.Second()
 
+	// @teacoder: Processing a single entry in a function will let us use the
+	// unit-testing features of Go more effectively
 	for i := 0; i < count; i++ {
 		entry := entries[i].Get()
 		min := int(entry["min"].(uint8))
