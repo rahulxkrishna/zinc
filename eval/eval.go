@@ -6,28 +6,18 @@ import (
 	_ "io/ioutil"
 	_ "math/rand"
 	"os/exec"
-	"sort"
 	_ "strings"
 	"time"
 )
 
-type ExecEntry struct {
+type Exec struct {
 	id       uint32
 	atTime   int64
 	interval int64 //seconds
 	cmd      string
 }
 
-type byTime []ExecEntry
-
-type EvalQueue struct {
-	entries [manager.MaxEntries]ExecEntry
-	count   int
-}
-
-type Evaluator struct {
-	eQ EvalQueue
-}
+var execQueue [manager.MaxEntries]Exec
 
 // Execute runs the command passed to it
 func execute(cmd string) error {
@@ -44,19 +34,9 @@ func execute(cmd string) error {
 	return nil
 }
 
-func (e byTime) Len() int           { return len(e) }
-func (e byTime) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
-func (e byTime) Less(i, j int) bool { return e[i].atTime < e[j].atTime }
-
-func (eQ *EvalQueue) sort() {
-	sort.Sort(byTime(eQ.entries[0:eQ.count]))
-}
-
-// populateExecQueue converts the in-memory crontab config to an exec queue format for
+// PopulateExecQueue converts the in-memory config to an exec queue format for
 // the evaluator to run over and execute.
-func (e *Evaluator) populateExecQueue(
-	entries [manager.MaxEntries]manager.Entry,
-	count int) {
+func populateExecQueue(entries [manager.MaxEntries]manager.Entry, count int) {
 
 	const SecondsInMin int = 60
 	const SecondsInHour int = 3600
@@ -68,15 +48,13 @@ func (e *Evaluator) populateExecQueue(
 
 	// There has to be a better way to do this.
 	// TODO Add UTs
-	secondsToday := SecondsInHour*curTime.Hour() + SecondsInMin*curTime.Minute() + curTime.Second()
+	secondsToday := SecondsInHour*curTime.Hour() + SecondsInMin*curTime.Minute()
 
-	// @teacoder: Processing a single entry in a function will let us use the
-	// unit-testing features of Go more effectively
 	for i := 0; i < count; i++ {
-		entry := entries[i].Get()
-		min := int(entry["min"].(uint8))
-		hr := int(entry["hr"].(uint8))
-		cmd := entry["cmd"].(string)
+		e := entries[i].Get()
+		min := int(e["min"].(uint8))
+		hr := int(e["hr"].(uint8))
+		cmd := e["cmd"].(string)
 		secondsSched := SecondsInHour*hr + SecondsInMin*min
 
 		// Scheduled in the future on the same day
@@ -85,47 +63,38 @@ func (e *Evaluator) populateExecQueue(
 		} else { // Scheduled for the next day
 			secondsTd = int64(((SecondsInHour * 24) - secondsToday) + secondsSched)
 		}
-		e.eQ.entries[i] = ExecEntry{100, curTime.Unix() + secondsTd, int64(SecondsInDay), cmd}
+		execQueue[i] = Exec{100, curTime.Unix() + secondsTd, int64(SecondsInDay), cmd}
 		fmt.Printf("Running [%s] in %d seconds\n", cmd, secondsTd)
 	}
-	e.eQ.count = count
-	e.eQ.sort()
 }
 
-// initialize the internal data structures for the evaluator
-func (e *Evaluator) initialize(entries [manager.MaxEntries]manager.Entry, count int) {
-	e.populateExecQueue(entries, count)
+// Init initializes the internal data structures for the evaluator
+func initialize(entries [manager.MaxEntries]manager.Entry, count int) {
+	populateExecQueue(entries, count)
 }
 
-// runHead runs the commands which are up for execution starting at the head
-// of the execution queue.
-func (e *Evaluator) runHead() {
-	for i := 0; i < e.eQ.count; i++ {
-		//If it's time, run it and schedule it for the next interval
-		if time.Now().Unix() >= e.eQ.entries[i].atTime {
-			execute(e.eQ.entries[i].cmd)
-			e.eQ.entries[i].atTime += e.eQ.entries[i].interval
+// Poll will be called periodicaly from the main loop.
+// It walks the execution queue and run any commands whose time has come
+func poll() {
+	for i := 0; i < len(execQueue); i++ {
+		if execQueue[i].id != 0 && time.Now().Unix() >= execQueue[i].atTime {
+			execute(execQueue[i].cmd)
+			//Now, schedule it for the next interval
+			execQueue[i].atTime += execQueue[i].interval
 			fmt.Printf("Executed [%s], next on %s \n",
-				e.eQ.entries[i].cmd,
-				time.Unix(e.eQ.entries[i].atTime, 0).String())
-		} else {
-			break
+				execQueue[i].cmd,
+				time.Unix(execQueue[i].atTime, 0).String())
 		}
 	}
-
-	// Always keep the next event at the head of the queue
-	e.eQ.sort()
 }
 
-// Run is the entry function into the evaluator. It initializes the execution queue
-// and bocks till the time the earliest command is to be run.
+// Run is the entry function into the evaluator. It runs for ever, polling the
+// execution queue every second
 func Run(entries [manager.MaxEntries]manager.Entry, count int) {
-	var eval Evaluator
-	eval.initialize(entries, count)
+	initialize(entries, count)
+
 	for {
-		timer := time.NewTimer(time.Duration(
-			eval.eQ.entries[0].atTime-time.Now().Unix()) * time.Second)
-		<-timer.C
-		eval.runHead()
+		time.Sleep(1000)
+		poll()
 	}
 }
