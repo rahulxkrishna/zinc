@@ -122,8 +122,8 @@ func (m *Manager) readCrontab() (err error) {
 			// Empty line; Ignore
 			continue
 		}
-		// Replace wildcard with "-1" ("255" in uint8)
-		line = strings.Replace(line, "*", "-1", -1)
+		// Replace wildcard with "255"
+		line = strings.Replace(line, "*", "255", -1)
 		tokens := strings.Fields(line)
 		if tokens[0] == "#" {
 			// Comment line; Ignore
