@@ -2,7 +2,8 @@ package eval
 
 import (
 	"fmt"
-	"github.com/teacoder/gron/manager"
+	"github.com/1d4Nf6/gron/manager"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -11,7 +12,13 @@ const GRON_WILDCARD = 255
 
 // Execute runs the command passed to it
 func execute(cmd string) error {
-	cmdExec := exec.Command(cmd)
+	userShell := os.Getenv("SHELL")
+
+	// Set a default shell and move on? Or, quit?
+	if len(userShell) == 0 {
+		userShell = "sh"
+	}
+	cmdExec := exec.Command(userShell, "-c", cmd)
 	op, err := cmdExec.Output()
 
 	if err != nil {
