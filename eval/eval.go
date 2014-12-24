@@ -64,6 +64,12 @@ func poll(entries [manager.MaxEntries]manager.Entry, count int) {
 // Run is the entry function into the evaluator. It runs for ever, polling the
 // execution queue every minute
 func Run(entries [manager.MaxEntries]manager.Entry, count int) {
+
+	// Sleep till the top of the next minute
+	secsToNextMinute := 60 - time.Now().Second()
+	time.Sleep(time.Second * time.Duration(secsToNextMinute))
+
+	// From now on, execute every minute
 	for {
 		poll(entries, count)
 		time.Sleep(time.Minute)

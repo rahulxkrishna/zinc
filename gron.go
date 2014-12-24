@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/teacoder/gron/eval"
-	"github.com/teacoder/gron/manager"
+	"github.com/1d4Nf6/gron/eval"
+	"github.com/1d4Nf6/gron/manager"
 	"log"
 	"os"
 	"sync"
