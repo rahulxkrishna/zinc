@@ -2,7 +2,7 @@ package eval
 
 import (
 	"fmt"
-	"github.com/1d4Nf6/gron/manager"
+	"github.com/1d4Nf6/zinc/manager"
 	"os"
 	"os/exec"
 	"time"

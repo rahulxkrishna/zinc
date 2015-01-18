@@ -11,7 +11,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" && r.URL.Path != page {
 		page = r.URL.Path
 	}
-	// TODO: to see the pages, pwd should be github.com/teacoder/gron; fix this
+	// TODO: to see the pages, pwd should be github.com/1d4Nf6/zinc; fix this
 	t, err := template.ParseFiles("manager/template" + page)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

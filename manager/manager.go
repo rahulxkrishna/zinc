@@ -1,5 +1,5 @@
 /*
-Package manager implements the gron manager.
+Package manager implements the zinc manager.
 */
 package manager
 

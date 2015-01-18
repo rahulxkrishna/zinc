@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/1d4Nf6/gron/eval"
-	"github.com/1d4Nf6/gron/manager"
+	"github.com/1d4Nf6/zinc/eval"
+	"github.com/1d4Nf6/zinc/manager"
 	"log"
 	"os"
 	"sync"
