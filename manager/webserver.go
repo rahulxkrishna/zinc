@@ -7,10 +7,17 @@ import (
 
 // ServeHTTP serves HTTP requests
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	page := "/index.htm"
+	page := "/login.htm"
+
 	if r.URL.Path != "/" && r.URL.Path != page {
 		page = r.URL.Path
 	}
+
+	switch r.URL.Path {
+	case "/login":
+		page = "/index.htm"
+	}
+
 	// TODO: to see the pages, pwd should be github.com/1d4Nf6/zinc; fix this
 	t, err := template.ParseFiles("manager/template" + page)
 	if err != nil {
