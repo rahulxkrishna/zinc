@@ -17,7 +17,32 @@
     <article>
       <section>
         <p>Using crontab file {{.Crontab}}.</p>
-        <code>{{range .Entries}}{{.BuildEntry}}<br />{{end}}</code>
+        <table id="entries" class="entries-table">
+        <code>
+            <tr>
+                <th> ID </th>
+                <th> Min </th>
+                <th> Hour </th>
+                <th> DOM </th>
+                <th> Month </th>
+                <th> DOW</th>
+                <th> User</th>
+                <th> Command</th>
+            </tr>
+            {{range $i, $_ := .Entries}}
+            <tr>
+                <td> <a href="index.htm">{{$i}}</a></td>
+                <td> {{.Get.min}} </td>
+                <td> {{.Get.hr}} </td>
+                <td> {{.Get.dom}} </td>
+                <td> {{.Get.mon}} </td>
+                <td> {{.Get.dow}} </td>
+                <td> {{.Get.user}} </td>
+                <td> {{.Get.cmd}} </td>
+            </tr>
+            {{end}}
+        </code>
+        </table>
       </section>
     </article>
     <footer>

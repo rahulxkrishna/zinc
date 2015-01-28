@@ -40,7 +40,7 @@ const MaxEntries = 10
 
 // @jayanthc
 // The Manager struct variables are private to the package. We need a getter.
-func (e *Entry) Get() map[string]interface{} {
+func (e Entry) Get() map[string]interface{} {
 	m := map[string]interface{}{
 		"min": e.min, "hr": e.hr, "dom": e.dom, "mon": e.mon,
 		"dow": e.dow, "user": e.user, "cmd": e.cmd}
