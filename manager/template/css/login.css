@@ -1,0 +1,29 @@
+.container {
+    margin:100px auto; 
+    width:400px;
+}
+
+input#username, input#password {
+    margin: auto 85px;
+    padding: 0 10px;
+    width: 200px;
+    height: 34px;
+    color: #404040;
+    background: white;
+    border: 1px solid;
+    border-color: #c4c4c4 #d1d1d1 #d4d4d4;
+    outline: 5px solid #eff4f7;
+}
+
+input[type=submit]#login {
+    margin:auto 160px;
+    padding: 0 20px;
+    height: 30px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #527881;
+    background: #cde5ef;
+    border: 1px solid;
+    border-color: #b4ccce #b3c0c8 #9eb9c2;
+    border-radius: 16px;
+}
