@@ -107,7 +107,7 @@ func (m *Manager) readCrontab() (err error) {
 	err = nil
 
 	// Read the crontab
-	fmt.Printf("Reading crontab file %s...\n", m.crontab)
+	//fmt.Printf("Reading crontab file %s...\n", m.crontab)
 	m.crontabContents, err = ioutil.ReadFile(m.crontab)
 	if err != nil {
 		return
